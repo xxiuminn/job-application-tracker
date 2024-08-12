@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-type createListProps = {
-  handleCreateList: () => void;
+type createJobProps = {
+  handleCreateJob: () => void;
 };
 
-const AddJobModal = ({ handleCreateList }: createListProps) => {
+const AddJobModal = ({ handleCreateJob }: createJobProps) => {
   const [company, setCompany] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -13,12 +13,12 @@ const AddJobModal = ({ handleCreateList }: createListProps) => {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
-    handleCreateList();
+    handleCreateJob();
   };
 
   const handleSubmitList = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    handleCreateList();
+    handleCreateJob();
   };
 
   const handleInputChange = (item: string, value: string) => {
@@ -56,6 +56,7 @@ const AddJobModal = ({ handleCreateList }: createListProps) => {
                         {item}
                       </label>
                       <input
+                        required
                         id={item}
                         key={`${item}-input`}
                         className="outline outline-1 outline-gray-400 px-2"
