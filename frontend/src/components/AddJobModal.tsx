@@ -8,6 +8,9 @@ const AddJobModal = ({ handleCreateJob }: createJobProps) => {
   const [company, setCompany] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [url, setUrl] = useState<string>("");
+  const [salary, setSalary] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
 
   const cancelAddList = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -31,6 +34,15 @@ const AddJobModal = ({ handleCreateJob }: createJobProps) => {
         break;
       case "Description":
         setDescription(value);
+        break;
+      case "URL":
+        setUrl(value);
+        break;
+      case "Salary":
+        setSalary(value);
+        break;
+      case "Location":
+        setLocation(value);
     }
   };
 
@@ -44,7 +56,14 @@ const AddJobModal = ({ handleCreateJob }: createJobProps) => {
               className="flex flex-col justify-center items-start"
               onSubmit={handleSubmitList}
             >
-              {["Company", "Title", "Description"].map((item) => {
+              {[
+                "Company",
+                "Title",
+                "Description",
+                "Url",
+                "Salary",
+                "Location",
+              ].map((item) => {
                 return (
                   <>
                     <div>
@@ -68,7 +87,13 @@ const AddJobModal = ({ handleCreateJob }: createJobProps) => {
                             ? company
                             : item === "Title"
                             ? title
-                            : description
+                            : item === "Description"
+                            ? description
+                            : item === "URL"
+                            ? url
+                            : item === "Salary"
+                            ? salary
+                            : location
                         }
                       ></input>
                     </div>
