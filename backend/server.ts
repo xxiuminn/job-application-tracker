@@ -5,6 +5,7 @@ dotenv.config();
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import auth from "./src/routers/auth";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -21,6 +22,8 @@ app.use(limiter);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use("/auth", auth);
 
 const PORT = process.env.port || 8000;
 app.listen(PORT, () => {
