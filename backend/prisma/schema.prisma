@@ -28,7 +28,7 @@ model User {
 model List {
   id Int @id @default(autoincrement())
   title String @db.VarChar(50)
-  userId String @unique @map("user_id")
+  userId String @map("user_id")
   user User @relation(fields: [userId], references: [id])
   job Job[]
 
