@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import auth from "./src/routers/auth";
+import list from "./src/routers/list";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", auth);
+app.use("/list", list);
 
 const PORT = process.env.port || 8000;
 app.listen(PORT, () => {
