@@ -7,6 +7,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import auth from "./src/routers/auth";
 import list from "./src/routers/list";
+import job from "./src/routers/job";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", auth);
 app.use("/list", list);
+app.use("/job", job);
 
 const PORT = process.env.port || 8000;
 app.listen(PORT, () => {
