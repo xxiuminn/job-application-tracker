@@ -3,4 +3,9 @@ interface CreateList {
   user_id: string;
 }
 
-export { CreateList };
+interface UpdateList {
+  title: string;
+  id: number;
+}
+
+export { CreateList, UpdateList };
