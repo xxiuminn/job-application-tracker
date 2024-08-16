@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { CreateList } from "../interfaces/list";
+import { CreateList, UpdateList } from "../interfaces/list";
 
 const prisma = new PrismaClient();
 
@@ -53,10 +53,32 @@ const delList = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       console.error(error.message);
       res.status(400).json({ status: "error", msg: "error deleting list" });
-    } else console.error(error, "unknown delete list error");
+    } else {
+      console.error(error, "unknown delete list error");
+      res.status(500).json({ status: "error", msg: "Internal server error" });
+    }
   }
 };
 
-const patchList = async (req: Request, res: Response) => {};
+const patchList = async (req: Request, res: Response) => {
+  const { id, title }: UpdateList = req.body;
+  try {
+    await prisma.list.update({
+      where: { id },
+      data: {
+        title,
+      },
+    });
+    res.json({ status: "ok", msg: "list updated" });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(400).json({ status: "error", msg: "error updating list" });
+    } else {
+      console.error(error, "unknown update list error");
+      res.status(500).json({ status: "error", msg: "Internal server error" });
+    }
+  }
+};
 
-export default { getAllList, createList, delList };
+export default { getAllList, createList, delList, patchList };
