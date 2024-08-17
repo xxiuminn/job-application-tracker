@@ -1,12 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 const prisma = new PrismaClient();
-import GetJobs from "../interfaces/job";
+import { CreateJob, GetJobs, UpdateJob, DelJob } from "../interfaces/job";
 const getAllJobs = async (req: Request, res: Response) => {
+  const { user_id }: GetJobs = req.body;
   const jobs = await prisma.job.findMany({
     where: {
       list: {
-        userId: req.body.user_id,
+        userId: user_id,
       },
     },
     select: {
@@ -45,7 +46,7 @@ const createJob = async (req: Request, res: Response) => {
       location,
       attachment,
       listId,
-    }: GetJobs = req.body;
+    }: CreateJob = req.body;
     await prisma.job.create({
       data: {
         title,
@@ -70,8 +71,9 @@ const createJob = async (req: Request, res: Response) => {
 };
 
 const delJob = async (req: Request, res: Response) => {
+  const { id }: DelJob = req.body;
   try {
-    await prisma.job.delete({ where: { id: req.body.id } });
+    await prisma.job.delete({ where: { id } });
     res.json({ status: "ok", msg: "job deleted" });
   } catch (error) {
     if (error instanceof Error) {
@@ -85,8 +87,16 @@ const delJob = async (req: Request, res: Response) => {
 };
 
 const patchJob = async (req: Request, res: Response) => {
-  const { id, title, description, url, salary, location, attachment, listId } =
-    req.body;
+  const {
+    id,
+    title,
+    description,
+    url,
+    salary,
+    location,
+    attachment,
+    listId,
+  }: UpdateJob = req.body;
   try {
     await prisma.job.update({
       where: { id },
