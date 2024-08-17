@@ -5,7 +5,7 @@ interface CreateJob {
   salary: string;
   location: string;
   attachment: string[];
-  listId: number;
+  list_id: number;
 }
 
 interface GetJobs {
