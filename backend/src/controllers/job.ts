@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 const prisma = new PrismaClient();
 import { CreateJob, GetJobs, UpdateJob, DelJob } from "../interfaces/job";
@@ -45,7 +45,7 @@ const createJob = async (req: Request, res: Response) => {
       salary,
       location,
       attachment,
-      listId,
+      list_id,
     }: CreateJob = req.body;
     await prisma.job.create({
       data: {
@@ -55,7 +55,7 @@ const createJob = async (req: Request, res: Response) => {
         salary,
         location,
         attachment,
-        list: { connect: { id: listId } },
+        list: { connect: { id: list_id } },
       },
     });
     res.json("done");
