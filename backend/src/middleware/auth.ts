@@ -29,3 +29,5 @@ const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
     }
   } else res.status(403).json({ status: "error", msg: "forbidden" });
 };
+
+export default auth;
