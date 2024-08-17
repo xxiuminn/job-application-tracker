@@ -1,13 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { CreateList, UpdateList } from "../interfaces/list";
+import { CreateList, UpdateList, DelList, GetList } from "../interfaces/list";
 
 const prisma = new PrismaClient();
 
 const getAllList = async (req: Request, res: Response) => {
   // need to make sure that only the user get all his/her own list
+  const { user_id }: GetList = req.body;
   try {
-    const lists = await prisma.list.findMany();
+    const lists = await prisma.list.findMany({
+      where: { userId: user_id },
+    });
     res.json(lists);
     console.log(lists);
   } catch (error) {
@@ -46,8 +49,9 @@ const createList = async (req: Request, res: Response) => {
 
 const delList = async (req: Request, res: Response) => {
   // need to make sure that only the user can delete his/her own list
+  const { id }: DelList = req.body;
   try {
-    await prisma.list.delete({ where: { id: req.body.id } });
+    await prisma.list.delete({ where: { id } });
     res.json({ status: "ok", msg: "list deleted" });
   } catch (error) {
     if (error instanceof Error) {
