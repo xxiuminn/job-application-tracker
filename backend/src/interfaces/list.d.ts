@@ -8,4 +8,12 @@ interface UpdateList {
   id: number;
 }
 
-export { CreateList, UpdateList };
+interface DelList {
+  id: number;
+}
+
+interface GetList {
+  user_id: string;
+}
+
+export { CreateList, UpdateList, DelList, GetList };
