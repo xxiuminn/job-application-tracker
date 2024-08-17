@@ -49,6 +49,7 @@ const createList = async (req: Request, res: Response) => {
 
 const delList = async (req: Request, res: Response) => {
   // need to make sure that only the user can delete his/her own list
+  // ensure list is empty to allow delete.
   const { id }: DelList = req.body;
   try {
     await prisma.list.delete({ where: { id } });
