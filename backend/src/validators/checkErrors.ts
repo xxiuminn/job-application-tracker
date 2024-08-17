@@ -14,7 +14,7 @@ const checkErrors =
         }));
         res.status(400).json({ status: "error", msg: errorMessages });
       } else {
-        res
+        return res
           .status(500)
           .json({ status: "error", msg: "unknown internal server error" });
       }
