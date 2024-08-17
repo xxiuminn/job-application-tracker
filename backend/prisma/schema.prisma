@@ -43,7 +43,7 @@ model Job {
   salary String? @db.VarChar(50)
   location String? @db.Text
   attachment String[]
-  listId Int @unique @map("list_id")
+  listId Int @map("list_id")
   list List @relation(fields: [listId], references: [id])
 
   @@map("job")
