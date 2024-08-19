@@ -2,8 +2,25 @@ import { PrismaClient, Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 const prisma = new PrismaClient();
 import { CreateJob, GetJobs, UpdateJob, DelJob } from "../interfaces/job";
-const getAllJobs = async (req: Request, res: Response) => {
+
+interface CustomRequest extends Request {
+  decoded?: { id: string };
+}
+const getAllJobs = async (req: CustomRequest, res: Response) => {
   const { user_id }: GetJobs = req.body;
+
+  if (!req.decoded) {
+    return res.status(400).json({ status: "error", msg: "invalid request" });
+  }
+
+  const userExists = await prisma.user.findUnique({
+    where: { id: req.decoded.id },
+  });
+
+  if (!userExists) {
+    return res.status(401).json({ status: "error", msg: "unauthorised" });
+  }
+
   const jobs = await prisma.job.findMany({
     where: {
       list: {
