@@ -8,10 +8,6 @@ interface CreateJob {
   list_id: number;
 }
 
-interface GetJobs {
-  user_id: string;
-}
-
 interface UpdateJob {
   id: number;
   title: string;
@@ -27,4 +23,4 @@ interface DelJob {
   id: number;
 }
 
-export { CreateJob, GetJobs, UpdateJob, DelJob };
+export { CreateJob, UpdateJob, DelJob };
