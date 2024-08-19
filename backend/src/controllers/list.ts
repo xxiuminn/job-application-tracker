@@ -1,18 +1,22 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { CreateList, UpdateList, DelList, GetList } from "../interfaces/list";
+import { CreateList, UpdateList, DelList } from "../interfaces/list";
 
 const prisma = new PrismaClient();
 
-const getAllList = async (req: Request, res: Response) => {
-  // need to make sure that only the user get all his/her own list
-  const { user_id }: GetList = req.body;
+interface CustomRequest extends Request {
+  decoded?: { id: string };
+}
+
+const getAllList = async (req: CustomRequest, res: Response) => {
+  if (!req.decoded) {
+    return res.status(401).json({ status: "error", msg: "invalid request" });
+  }
   try {
     const lists = await prisma.list.findMany({
-      where: { userId: user_id },
+      where: { userId: req.decoded.id },
     });
     res.json(lists);
-    console.log(lists);
   } catch (error) {
     if (error instanceof Error) {
       console.log(error.message);
@@ -24,15 +28,16 @@ const getAllList = async (req: Request, res: Response) => {
   }
 };
 
-const createList = async (req: Request, res: Response) => {
-  // need to make sure that only the user can create his/her own list
-
-  const { title, user_id }: CreateList = req.body;
+const createList = async (req: CustomRequest, res: Response) => {
+  const { title }: CreateList = req.body;
+  if (!req.decoded) {
+    return res.status(401).json({ status: "error", msg: "invalid request" });
+  }
   try {
     await prisma.list.create({
       data: {
         title,
-        userId: user_id,
+        userId: req.decoded.id,
       },
     });
     res.json({ status: "ok", msg: "list created" });
@@ -47,10 +52,36 @@ const createList = async (req: Request, res: Response) => {
   }
 };
 
-const delList = async (req: Request, res: Response) => {
-  // need to make sure that only the user can delete his/her own list
+const delList = async (req: CustomRequest, res: Response) => {
   // ensure list is empty to allow delete.
   const { id }: DelList = req.body;
+  const list = await prisma.list.findUnique({ where: { id } });
+  if (!list) {
+    return res.status(400).json({ status: "error", msg: "can't find list" });
+  }
+
+  if (!req.decoded) {
+    return res.status(400).json({ status: "error", msg: "invalid request" });
+  }
+
+  if (list.userId !== req.decoded.id) {
+    return res
+      .status(401)
+      .json({ status: "error", msg: "unauthorised to delete list" });
+  }
+
+  const job = await prisma.list.findUnique({
+    where: { id },
+    select: { job: true },
+  });
+
+  if (!job?.job.length) {
+    return res.status(400).json({
+      status: "error",
+      msg: "there are jobs in the list, can't delete",
+    });
+  }
+
   try {
     await prisma.list.delete({ where: { id } });
     res.json({ status: "ok", msg: "list deleted" });
@@ -65,8 +96,24 @@ const delList = async (req: Request, res: Response) => {
   }
 };
 
-const patchList = async (req: Request, res: Response) => {
+const patchList = async (req: CustomRequest, res: Response) => {
   const { id, title }: UpdateList = req.body;
+
+  const list = await prisma.list.findUnique({ where: { id } });
+  if (!list) {
+    return res.status(400).json({ status: "error", msg: "can't find list" });
+  }
+
+  if (!req.decoded) {
+    return res.status(400).json({ status: "error", msg: "invalid request" });
+  }
+
+  if (list.userId !== req.decoded.id) {
+    return res
+      .status(401)
+      .json({ status: "error", msg: "unauthorised to amend list" });
+  }
+
   try {
     await prisma.list.update({
       where: { id },
