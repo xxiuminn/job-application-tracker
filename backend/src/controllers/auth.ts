@@ -26,7 +26,7 @@ const register = async (req: Request, res: Response) => {
         hash,
       },
     });
-    res.json(newUser);
+    res.json({ status: "ok", msg: "user created" });
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -38,7 +38,7 @@ const register = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
   const { email, password }: Login = req.body;
-  const user = await prisma.user.findFirst({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
     return res
