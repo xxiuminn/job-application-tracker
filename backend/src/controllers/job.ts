@@ -1,59 +1,57 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 const prisma = new PrismaClient();
-import { CreateJob, GetJobs, UpdateJob, DelJob } from "../interfaces/job";
+import { CreateJob, UpdateJob, DelJob } from "../interfaces/job";
 
 interface CustomRequest extends Request {
   decoded?: { id: string };
 }
 const getAllJobs = async (req: CustomRequest, res: Response) => {
-  const { user_id }: GetJobs = req.body;
-
   if (!req.decoded) {
     return res.status(400).json({ status: "error", msg: "invalid request" });
   }
 
-  const userExists = await prisma.user.findUnique({
-    where: { id: req.decoded.id },
-  });
-
-  if (!userExists) {
-    return res.status(401).json({ status: "error", msg: "unauthorised" });
-  }
-
-  const jobs = await prisma.job.findMany({
-    where: {
-      list: {
-        userId: user_id,
+  try {
+    const jobs = await prisma.job.findMany({
+      where: {
+        list: {
+          userId: req.decoded.id,
+        },
       },
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      url: true,
-      salary: true,
-      location: true,
-      attachment: true,
-      list: {
-        select: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        url: true,
+        salary: true,
+        location: true,
+        attachment: true,
+        list: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  res.json(jobs);
-  console.log(jobs);
+    res.json(jobs);
+    console.log(jobs);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      res.status(400).json({ status: "error", msg: "error getting jobs" });
+    } else console.error(error, "unknown get all jobs error");
+    res.status(500).json({ status: "error", msg: "Internal server error" });
+  }
 };
 
-const createJob = async (req: Request, res: Response) => {
+const createJob = async (req: CustomRequest, res: Response) => {
   try {
     const {
       title,
@@ -64,6 +62,27 @@ const createJob = async (req: Request, res: Response) => {
       attachment,
       list_id,
     }: CreateJob = req.body;
+
+    const list = await prisma.list.findUnique({
+      where: { id: list_id },
+      include: { user: true },
+    });
+
+    if (!list) {
+      return res.status(400).json({ status: "error", msg: "can't find list" });
+    }
+
+    if (!req.decoded) {
+      return res.status(400).json({ status: "error", msg: "invalid request" });
+    }
+    if (list.user.id !== req.decoded.id) {
+      return res
+        .status(401)
+        .json({ status: "error", msg: "unauthorised to create job" });
+    }
+
+    console.log(list);
+
     await prisma.job.create({
       data: {
         title,
@@ -75,7 +94,7 @@ const createJob = async (req: Request, res: Response) => {
         list: { connect: { id: list_id } },
       },
     });
-    res.json("done");
+    res.json({ status: "ok", msg: "job created" });
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -87,8 +106,27 @@ const createJob = async (req: Request, res: Response) => {
   }
 };
 
-const delJob = async (req: Request, res: Response) => {
+const delJob = async (req: CustomRequest, res: Response) => {
   const { id }: DelJob = req.body;
+
+  const job = await prisma.job.findUnique({
+    where: { id },
+    include: { list: { include: { user: true } } },
+  });
+  if (!job) {
+    return res.status(400).json({ status: "error", msg: "can't find job" });
+  }
+
+  if (!req.decoded) {
+    return res.status(400).json({ status: "error", msg: "invalid request" });
+  }
+
+  if (job.list.user.id !== req.decoded.id) {
+    return res
+      .status(401)
+      .json({ status: "error", msg: "unauthorised to delete job" });
+  }
+
   try {
     await prisma.job.delete({ where: { id } });
     res.json({ status: "ok", msg: "job deleted" });
@@ -103,7 +141,7 @@ const delJob = async (req: Request, res: Response) => {
   }
 };
 
-const patchJob = async (req: Request, res: Response) => {
+const patchJob = async (req: CustomRequest, res: Response) => {
   const {
     id,
     title,
@@ -114,6 +152,25 @@ const patchJob = async (req: Request, res: Response) => {
     attachment,
     listId,
   }: UpdateJob = req.body;
+
+  const job = await prisma.job.findUnique({
+    where: { id },
+    include: { list: { include: { user: true } } },
+  });
+  if (!job) {
+    return res.status(400).json({ status: "error", msg: "can't find job" });
+  }
+
+  if (!req.decoded) {
+    return res.status(400).json({ status: "error", msg: "invalid request" });
+  }
+
+  if (job.list.user.id !== req.decoded.id) {
+    return res
+      .status(401)
+      .json({ status: "error", msg: "unauthorised to amend job" });
+  }
+
   try {
     await prisma.job.update({
       where: { id },
