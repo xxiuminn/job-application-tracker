@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useFetch } from "../hooks/useFetch";
 import { useEffect, useState } from "react";
 import { Methods } from "../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const fetchData = useFetch();
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const { data } = useQuery({
     queryKey: ["login"],
@@ -34,6 +36,7 @@ const Home = () => {
       setIsLogin(false);
       setEmail("");
       setPassword("");
+      navigate("/board");
     }
   }, [data]);
 
