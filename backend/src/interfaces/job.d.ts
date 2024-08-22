@@ -1,5 +1,6 @@
 interface CreateJob {
   title: string;
+  company: string;
   description: string;
   url: string;
   salary: string;
@@ -10,6 +11,7 @@ interface CreateJob {
 
 interface UpdateJob {
   id: number;
+  company: string;
   title: string;
   description: string;
   url: string;
