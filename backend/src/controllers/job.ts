@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 const prisma = new PrismaClient();
 import { CreateJob, UpdateJob, DelJob } from "../interfaces/job";
@@ -20,6 +20,7 @@ const getAllJobs = async (req: CustomRequest, res: Response) => {
       },
       select: {
         id: true,
+        company: true,
         title: true,
         description: true,
         url: true,
@@ -28,6 +29,7 @@ const getAllJobs = async (req: CustomRequest, res: Response) => {
         attachment: true,
         list: {
           select: {
+            id: true,
             user: {
               select: {
                 id: true,
@@ -55,6 +57,7 @@ const createJob = async (req: CustomRequest, res: Response) => {
   try {
     const {
       title,
+      company,
       description,
       url,
       salary,
@@ -86,6 +89,7 @@ const createJob = async (req: CustomRequest, res: Response) => {
     await prisma.job.create({
       data: {
         title,
+        company,
         description,
         url,
         salary,
@@ -145,6 +149,7 @@ const patchJob = async (req: CustomRequest, res: Response) => {
   const {
     id,
     title,
+    company,
     description,
     url,
     salary,
@@ -176,6 +181,7 @@ const patchJob = async (req: CustomRequest, res: Response) => {
       where: { id },
       data: {
         title,
+        company,
         description,
         url,
         salary,
