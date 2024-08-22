@@ -37,6 +37,7 @@ model List {
 
 model Job {
   id Int @id @default(autoincrement())
+  company String @db.VarChar(100)
   title String @db.VarChar(50)
   description String? @db.Text
   url String? @db.Text
