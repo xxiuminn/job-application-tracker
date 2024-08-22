@@ -8,6 +8,7 @@ const CreateJobSchema = z.object({
     })
     .min(1, { message: "title cannot be empty" }),
   description: z.string().optional(),
+  company: z.string().min(1, { message: "company cannot be empty" }),
   url: z.string().optional(),
   salary: z.string().optional(),
   location: z.string().optional(),
@@ -44,6 +45,7 @@ const PatchJobSchema = z.object({
       invalid_type_error: "title must be a string",
     })
     .optional(),
+  company: z.string().optional(),
   description: z.string().optional(),
   url: z.string().url().optional(),
   salary: z.string().optional(),
