@@ -24,7 +24,7 @@ const Home = () => {
         undefined
       ),
     enabled: isLogin,
-  });
+  }) as { data: { access: string } };
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLogin(true);
@@ -36,6 +36,7 @@ const Home = () => {
       setIsLogin(false);
       setEmail("");
       setPassword("");
+      localStorage.setItem("token", data.access);
       navigate("/board");
     }
   }, [data]);
