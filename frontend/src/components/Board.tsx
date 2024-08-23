@@ -1,13 +1,11 @@
 import { useState } from "react";
 import AddJobModal from "./AddJobModal";
-import AddListModal from "./AddListModal";
 import { Methods, useFetch } from "../hooks/useFetch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Board = () => {
   // const [list, setList] = useState<string[]>([]);
   const [jobModal, setJobModal] = useState(false);
-  const [listModal, setListModal] = useState(false);
   const fetchData = useFetch();
   const queryClient = useQueryClient();
 
@@ -41,7 +39,7 @@ const Board = () => {
     isSuccess: boolean;
   };
 
-  const { mutate: listMutate } = useMutation({
+  const { mutate: addList } = useMutation({
     mutationFn: () =>
       fetchData(
         "/list/create",
@@ -52,13 +50,30 @@ const Board = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["list"] }),
   });
 
+  const { mutate: delList } = useMutation({
+    mutationFn: (listId: number) =>
+      fetchData(
+        "/list/delete",
+        Methods.DELETE,
+        { id: listId },
+        localStorage.getItem("token") ?? undefined
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["list"] }),
+  });
+
+  const { mutate: updateList } = useMutation({
+    mutationFn: (listId: number) =>
+      fetchData(
+        "/list/update",
+        Methods.PATCH,
+        { id: listId },
+        localStorage.getItem("token") ?? undefined
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["list"] }),
+  });
+
   const handleCreateJob = () => {
     setJobModal(!jobModal);
-  };
-
-  const handleCreateList = () => {
-    setListModal(!listModal);
-    listMutate();
   };
 
   return (
@@ -68,7 +83,16 @@ const Board = () => {
           jobSuccess &&
           listData.map((list) => (
             <div key={list.id} className="w-72 bg-zinc-900 rounded-md relative">
-              <div className="m-2 p-4 text-white overflow-y-auto ">
+              <button
+                className="text-white mx-4 block"
+                onClick={() => delList(list.id)}
+              >
+                x
+              </button>
+              <div
+                className="py-2 text-white overflow-y-auto"
+                // onChange={(e) => setTitle(e.target.value)}
+              >
                 {list.title}
               </div>
               {jobData.map(
@@ -82,7 +106,10 @@ const Board = () => {
                     </div>
                   )
               )}
-              <button className="absolute bottom-0 left-0  border-t-2 text-white w-full p-4">
+              <button
+                className="absolute bottom-0 left-0  border-t-2 text-white w-full p-4"
+                onClick={handleCreateJob}
+              >
                 + Add a job
               </button>
             </div>
@@ -90,11 +117,11 @@ const Board = () => {
         <div>
           <button
             className="bg-zinc-900 text-white rounded-md p-6 w-72"
-            onClick={handleCreateList}
+            onClick={() => addList()}
           >
             + Add another list
           </button>
-          {/* {listModal && <AddListModal handleCreateList={handleCreateList} />} */}
+          {jobModal && <AddJobModal handleCreateJob={handleCreateJob} />}
         </div>
       </div>
     </div>
