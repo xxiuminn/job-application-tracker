@@ -75,7 +75,7 @@ const delList = async (req: CustomRequest, res: Response) => {
     select: { job: true },
   });
 
-  if (!job?.job.length) {
+  if (job?.job.length) {
     return res.status(400).json({
       status: "error",
       msg: "there are jobs in the list, can't delete",
