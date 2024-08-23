@@ -62,11 +62,11 @@ const Board = () => {
   });
 
   const { mutate: updateList } = useMutation({
-    mutationFn: (listId: number) =>
+    mutationFn: (param: { title: string; id: number }) =>
       fetchData(
         "/list/update",
         Methods.PATCH,
-        { id: listId },
+        { id: param.id, title: param.title },
         localStorage.getItem("token") ?? undefined
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["list"] }),
@@ -74,6 +74,10 @@ const Board = () => {
 
   const handleCreateJob = () => {
     setJobModal(!jobModal);
+  };
+
+  const handleUpdateTitle = (title: string, id: number) => {
+    updateList({ title, id });
   };
 
   return (
@@ -89,12 +93,11 @@ const Board = () => {
               >
                 x
               </button>
-              <div
-                className="py-2 text-white overflow-y-auto"
-                // onChange={(e) => setTitle(e.target.value)}
-              >
-                {list.title}
-              </div>
+              <input
+                className="py-2 text-white overflow-y-auto bg-zinc-900 text-center"
+                onChange={(e) => handleUpdateTitle(e.target.value, list.id)}
+                value={list.title}
+              ></input>
               {jobData.map(
                 (job) =>
                   job.list.id === list.id && (
