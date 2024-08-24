@@ -8,6 +8,7 @@ const Board = () => {
   const [jobModal, setJobModal] = useState(false);
   const fetchData = useFetch();
   const queryClient = useQueryClient();
+  const [currentListId, setCurrentListId] = useState<number | null>();
 
   const { data: listData, isSuccess: listSuccess } = useQuery({
     queryKey: ["list"],
@@ -40,8 +41,8 @@ const Board = () => {
   };
 
   const { mutate: addList } = useMutation({
-    mutationFn: () =>
-      fetchData(
+    mutationFn: async () =>
+      await fetchData(
         "/list/create",
         Methods.PUT,
         { title: "Edit Title" },
@@ -51,8 +52,8 @@ const Board = () => {
   });
 
   const { mutate: delList } = useMutation({
-    mutationFn: (listId: number) =>
-      fetchData(
+    mutationFn: async (listId: number) =>
+      await fetchData(
         "/list/delete",
         Methods.DELETE,
         { id: listId },
@@ -62,8 +63,8 @@ const Board = () => {
   });
 
   const { mutate: updateList } = useMutation({
-    mutationFn: (param: { title: string; id: number }) =>
-      fetchData(
+    mutationFn: async (param: { title: string; id: number }) =>
+      await fetchData(
         "/list/update",
         Methods.PATCH,
         { id: param.id, title: param.title },
@@ -72,8 +73,20 @@ const Board = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["list"] }),
   });
 
-  const handleCreateJob = () => {
-    setJobModal(!jobModal);
+  const { mutate: delJob } = useMutation({
+    mutationFn: async (jobId: number) =>
+      await fetchData(
+        "/job/delete",
+        Methods.DELETE,
+        { id: jobId },
+        localStorage.getItem("token") ?? undefined
+      ),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job"] }),
+  });
+
+  const handleCreateJob = (listId: number) => {
+    setCurrentListId(listId);
+    setJobModal(true);
   };
 
   const handleUpdateTitle = (title: string, id: number) => {
@@ -86,35 +99,55 @@ const Board = () => {
         {listSuccess &&
           jobSuccess &&
           listData.map((list) => (
-            <div key={list.id} className="w-72 bg-zinc-900 rounded-md relative">
-              <button
-                className="text-white mx-4 block"
-                onClick={() => delList(list.id)}
+            <div>
+              <div
+                key={list.id}
+                className="w-72 bg-zinc-900 rounded-md relative"
               >
-                x
-              </button>
-              <input
-                className="py-2 text-white overflow-y-auto bg-zinc-900 text-center"
-                onChange={(e) => handleUpdateTitle(e.target.value, list.id)}
-                value={list.title}
-              ></input>
-              {jobData.map(
-                (job) =>
-                  job.list.id === list.id && (
-                    <div className="m-2 p-4 bg-black rounded-md">
-                      <div className="text-white text-sm" key={job.id}>
-                        <div>{job.title}</div>
-                        <div className="font-thin text-sm">{job.company}</div>
+                <button
+                  className="text-white mx-4 block"
+                  onClick={() => delList(list.id)}
+                >
+                  x
+                </button>
+
+                <input
+                  className="py-2 text-white overflow-y-auto bg-zinc-900 text-center"
+                  onChange={(e) => handleUpdateTitle(e.target.value, list.id)}
+                  value={list.title}
+                ></input>
+              </div>
+              <div className="bg-zinc-900 overflow-y-auto h-3/4">
+                {jobData.map(
+                  (job) =>
+                    job.list.id === list.id && (
+                      <div className="m-2 p-4 bg-black rounded-md">
+                        <button
+                          className=" text-white text-sm font-thin"
+                          onClick={() => delJob(job.id)}
+                        >
+                          Delete
+                        </button>
+                        <div className="text-white text-sm" key={job.id}>
+                          <div>{job.title}</div>
+                          <div className="font-thin text-sm">{job.company}</div>
+                        </div>
                       </div>
-                    </div>
-                  )
-              )}
+                    )
+                )}
+              </div>
               <button
-                className="absolute bottom-0 left-0  border-t-2 text-white w-full p-4"
-                onClick={handleCreateJob}
+                className="border-t-2 text-white w-full p-4 bg-zinc-900 rounded-b-md"
+                onClick={() => handleCreateJob(list.id)}
               >
                 + Add a job
               </button>
+              {jobModal && currentListId === list.id && (
+                <AddJobModal
+                  handleCreateJob={() => setJobModal(false)}
+                  listId={currentListId}
+                />
+              )}
             </div>
           ))}
         <div>
@@ -124,7 +157,6 @@ const Board = () => {
           >
             + Add another list
           </button>
-          {jobModal && <AddJobModal handleCreateJob={handleCreateJob} />}
         </div>
       </div>
     </div>
