@@ -95,15 +95,12 @@ const Board = () => {
 
   return (
     <div className="flex bg-black h-screen overflow-x-auto overflow-y-hidden items-center">
-      <div className="grid grid-flow-col text-center h-5/6 gap-4 mx-4">
+      <div className="flex flex-row text-center h-5/6 gap-4 mx-4">
         {listSuccess &&
           jobSuccess &&
           listData.map((list) => (
-            <div>
-              <div
-                key={list.id}
-                className="w-72 bg-zinc-900 rounded-md relative"
-              >
+            <div className="h-full flex flex-col">
+              <div key={list.id} className="w-72 bg-zinc-900 rounded-md">
                 <button
                   className="text-white mx-4 block"
                   onClick={() => delList(list.id)}
@@ -112,12 +109,12 @@ const Board = () => {
                 </button>
 
                 <input
-                  className="py-2 text-white overflow-y-auto bg-zinc-900 text-center"
+                  className="py-2 text-white bg-zinc-900 text-center"
                   onChange={(e) => handleUpdateTitle(e.target.value, list.id)}
                   value={list.title}
                 ></input>
               </div>
-              <div className="bg-zinc-900 overflow-y-auto h-3/4">
+              <div className="bg-zinc-900 overflow-y-auto">
                 {jobData.map(
                   (job) =>
                     job.list.id === list.id && (
