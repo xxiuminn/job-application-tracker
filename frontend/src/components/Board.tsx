@@ -98,6 +98,8 @@ const Board = () => {
   const handleDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (over && active.id !== over.id) {
+      console.log(active);
+      console.log(over);
       setJobArr((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
